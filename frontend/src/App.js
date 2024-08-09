@@ -1,19 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { fetchData } from './api';
+import { fetchTodos, addTodo, updateTodo, deleteTodo } from './api';
 
 function App() {
-  const [data, setData] = useState(null);
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState('');
 
   useEffect(() => {
-    fetchData().then(response => setData(response.message));
+    fetchTodos().then(data => setTodos(data));
   }, []);
+
+  const handleAddTodo = () => {
+    if (newTodo.trim()) {
+      addTodo({ title: newTodo }).then(todo => {
+        setTodos([...todos, todo]);
+        setNewTodo('');
+      });
+    }
+  };
+
+  const handleDeleteTodo = (id) => {
+    deleteTodo(id).then(() => {
+      setTodos(todos.filter(todo => todo.id !== id));
+    });
+  };
 
   return (
     <div className="App">
-      <h1>Frontend-Backend Example</h1>
-      <p>{data ? data : "Loading..."}</p>
+      <h1>Todo List</h1>
+      <input
+        type="text"
+        value={newTodo}
+        onChange={(e) => setNewTodo(e.target.value)}
+        placeholder="Add a new todo"
+      />
+      <button onClick={handleAddTodo}>Add</button>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            {todo.title} 
+            <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
 export default App;
+
